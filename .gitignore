@@ -1,0 +1,27 @@
+# 编译输出
+target/
+build/
+bin/
+out/
+classes/
+
+# 依赖目录
+node_modules/
+.gradle/
+.m2/
+ivy2/
+
+# IDE 相关
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# 日志
+*.log
+logs/
+
+# 系统文件
+.DS_Store
+Thumbs.db

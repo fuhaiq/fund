@@ -1,0 +1,85 @@
+oauth2:
+  url: http://auth.fuhaiq.com
+  realm: graphql
+  client-id: hasura
+  client-secret: arL51DSuRmSYuXev6Xd5hcUAilsWnIK8
+
+
+server:
+  port: 8088
+spring:
+  application:
+    name: fund-business
+  # 动态数据源配置
+  datasource:
+    dynamic:
+      primary: postgres
+      strict: false
+      datasource:
+        postgres:
+          type: com.zaxxer.hikari.HikariDataSource
+          hikari:
+            pool-name: POSTGRES-BUSINESS
+            maximum-pool-size: 5
+            minimum-idle: 1
+          driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://postgres:5432/postgres
+          username: postgres
+          password: postgrespassword
+        duckdb:
+          type: com.zaxxer.hikari.HikariDataSource
+          hikari:
+            pool-name: DUCKDBPool
+            maximum-pool-size: 5
+            minimum-idle: 1
+          driver-class-name: org.duckdb.DuckDBDriver
+          url: 'jdbc:duckdb:'
+
+  # oAuth2 安全认证
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "${oauth2.url}/realms/${oauth2.realm}/protocol/openid-connect/certs"
+
+# swagger oAuth2 安全认证
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${oauth2.client-id}
+      client-secret: ${oauth2.client-secret}
+
+keycloak:
+  enforcer:
+    policy-enforcer-config:
+      {
+        "realm": "graphql",
+        "auth-server-url": "http://auth.fuhaiq.com",
+        "resource": "hasura",
+        "credentials": {
+          "secret": "arL51DSuRmSYuXev6Xd5hcUAilsWnIK8"
+        },
+        "path-cache-config": {
+          "lifespan": -100
+        },
+        "paths": [
+          {
+            "path": "/swagger-ui/*",
+            "enforcement-mode": "DISABLED"
+          },
+          {
+            "path": "/v3/api-docs/*",
+            "enforcement-mode": "DISABLED"
+          },
+        ]
+      }
+
+logging:
+  level:
+    org.fhq.fund.mapper: debug
+
+# mybaits-plus配置
+mybatis-plus:
+  configuration:
+    local-cache-scope: statement
+  mapper-locations: classpath:/mapper/*Mapper.xml
