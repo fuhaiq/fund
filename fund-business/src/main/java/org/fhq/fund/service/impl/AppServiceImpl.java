@@ -22,7 +22,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements IAppS
     public boolean adjustPricesBelowBy30Percent(int below) {
         return update(
                 new LambdaUpdateWrapper<App>()
-                        .lt(App::getPrice, 100)
+                        .lt(App::getPrice, below)
                         .setSql("price = price * 1.3"));
     }
 }

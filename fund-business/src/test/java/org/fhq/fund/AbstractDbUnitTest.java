@@ -54,7 +54,7 @@ public abstract class AbstractDbUnitTest {
     public void setUp() {
         try {
             databaseTester = new DataSourceDatabaseTester(dataSource);
-            IDataSet dataset = loadDataSet("data.xls");
+            IDataSet dataset = loadDataSet("actual.xls");
             databaseTester.setDataSet(dataset);
             databaseTester.setTearDownOperation(DatabaseOperation.DELETE_ALL);
             databaseTester.onSetup();

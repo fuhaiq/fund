@@ -16,8 +16,17 @@ public class AppServiceTestCase extends AbstractDbUnitTest {
     private IAppService appService;
 
     @Test
-    public void test() throws DatabaseUnitException {
+    public void testAdjustPricesBelowBy30Percent() throws DatabaseUnitException {
         boolean success = appService.adjustPricesBelowBy30Percent(100);
+        Assertions.assertTrue(success, "上调价格失败");
+        ITable actual = getActualTable("app");
+        ITable expect = getExpectTable("app");
+        assertTables(actual, expect);
+    }
+
+    @Test
+    public void testAdjustPricesBelowBy30PercentFailed() throws DatabaseUnitException {
+        boolean success = appService.adjustPricesBelowBy30Percent(200);
         Assertions.assertTrue(success, "上调价格失败");
         ITable actual = getActualTable("app");
         ITable expect = getExpectTable("app");
