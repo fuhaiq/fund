@@ -26,14 +26,6 @@ spring:
           url: jdbc:postgresql://postgres:5432/postgres
           username: postgres
           password: postgrespassword
-        duckdb:
-          type: com.zaxxer.hikari.HikariDataSource
-          hikari:
-            pool-name: DUCKDBPool
-            maximum-pool-size: 5
-            minimum-idle: 1
-          driver-class-name: org.duckdb.DuckDBDriver
-          url: 'jdbc:duckdb:'
 
   # oAuth2 安全认证
   security:
