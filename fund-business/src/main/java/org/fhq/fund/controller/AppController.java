@@ -82,7 +82,7 @@ public class AppController {
     @Operation(summary = "根据id删除App应用信息")
     public R removeById(@Validated(DeleteGroup.class) @RequestBody App app) {
         if (!appService.removeById(app)) {
-            throw new BusinessException(HttpStatus.CONFLICT, ErrorCode.DELETE_FAILED);
+            throw new BusinessException(HttpStatus.NOT_FOUND, ErrorCode.DELETE_FAILED);
         }
         return R.ok();
     }

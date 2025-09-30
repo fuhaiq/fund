@@ -64,7 +64,6 @@ public class App extends Model<App> {
     @TableField(value = "version", fill = FieldFill.INSERT)
     @Version
     @Null(message = "不能指定版本号", groups = {AddGroup.class})
-    @NotNull(message = "版本号不能为空", groups = {UpdateGroup.class, DeleteGroup.class})
     private Integer version;
 
     @Override
