@@ -103,7 +103,7 @@ public class ${table.controllerName} {
     @Operation(summary = "根据id删除${table.comment}")
     public R removeById(@Validated(DeleteGroup.class) @RequestBody ${table.entityName} ${table.entityPath}){
         if(!${table.entityPath}Service.removeById(${table.entityPath})) {
-            throw new BusinessException(HttpStatus.CONFLICT, ErrorCode.DELETE_FAILED);
+            throw new BusinessException(HttpStatus.NOT_FOUND, ErrorCode.DELETE_FAILED);
         }
         return R.ok();
     }
