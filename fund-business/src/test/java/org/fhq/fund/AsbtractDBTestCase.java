@@ -1,10 +1,8 @@
 package org.fhq.fund;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dbunit.Assertion;
-import org.dbunit.DataSourceDatabaseTester;
-import org.dbunit.DatabaseUnitException;
-import org.dbunit.IDatabaseTester;
+import org.dbunit.*;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
@@ -26,7 +24,11 @@ import java.util.Map;
 
 @SpringBootTest(classes = FundApplication.class)
 @Slf4j
-public abstract class AbstractDbUnitTest {
+public abstract class AsbtractDBTestCase extends DBTestCase {
+
+    private final String dir;
+
+    private final Map<String, ITable> expectTables = new HashMap<>();
 
     protected static final String[] defaultIgnoreCols = {
             "id", "create_time", "update_time", "create_by", "update_by", "version"
@@ -35,11 +37,10 @@ public abstract class AbstractDbUnitTest {
     @Autowired
     private DataSource dataSource;
 
-    private IDatabaseTester databaseTester;
+    public AsbtractDBTestCase(String name, String dir) {
+        super(name);
+        this.dir = dir;
 
-    private final Map<String, ITable> expectTables = new HashMap<>();
-
-    public AbstractDbUnitTest() {
         try {
             IDataSet dataset = loadDataSet("expect.xls");
             for (String tableName : dataset.getTableNames()) {
@@ -50,39 +51,47 @@ public abstract class AbstractDbUnitTest {
         }
     }
 
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.PROPERTY_TABLE_TYPE, new String[]{"BASE TABLE", "TABLE"});
+    }
+
+    @Override
+    protected IDataSet getDataSet() throws Exception {
+        return loadDataSet("actual.xls");
+    }
+
+    @Override
+    protected IDatabaseTester getDatabaseTester() {
+        return new DataSourceDatabaseTester(dataSource);
+    }
+
     @BeforeEach
-    public void setUp() {
-        try {
-            databaseTester = new DataSourceDatabaseTester(dataSource);
-            IDataSet dataset = loadDataSet("actual.xls");
-            databaseTester.setDataSet(dataset);
-            databaseTester.setTearDownOperation(DatabaseOperation.DELETE_ALL);
-            databaseTester.onSetup();
-        } catch (Exception ex) {
-            throw new RuntimeException("DBUnit setUp error", ex);
-        }
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @Override
+    protected DatabaseOperation getTearDownOperation() {
+        return DatabaseOperation.DELETE_ALL;
     }
 
     @AfterEach
-    public void tearDown() {
-        if (databaseTester != null) {
-            try {
-                databaseTester.onTearDown();
-            } catch (Exception ex) {
-                throw new RuntimeException("DBUnit tearDown error", ex);
-            }
-        }
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
     }
 
     private IDataSet loadDataSet(String fileName) throws IOException, DataSetException {
-        String filePath = baseDir() + "/" + fileName;
+        String filePath = dir + "/" + fileName;
         File dataFile = new ClassPathResource(filePath).getFile();
         return new XlsDataSet(dataFile);
     }
 
     protected ITable getActualTable(String name) {
         try {
-            return databaseTester.getConnection().createDataSet().getTable(name);
+            return getDatabaseTester().getConnection().createDataSet().getTable(name);
         } catch (Exception ex) {
             throw new RuntimeException("DBUnit getActualTable error", ex);
         }
@@ -102,6 +111,4 @@ public abstract class AbstractDbUnitTest {
                 new SortedTable(actualFiltered, expectedFiltered.getTableMetaData())
         );
     }
-
-    protected abstract String baseDir();
 }

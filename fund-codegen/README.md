@@ -24,7 +24,7 @@ id uuid NOT NULL DEFAULT uuid_generate_v7(),
     },
     {
       "name": "price",
-      "type": "number",
+      "type": "NUMERIC",
       "required": true
     },
     {
@@ -68,4 +68,37 @@ id uuid NOT NULL DEFAULT uuid_generate_v7(),
     }
   ]
 }
+```
+
+生成的schema如下
+```sql
+-- 创建 app 表
+CREATE TABLE app (
+    id BIGINT NOT NULL,
+    name TEXT NOT NULL,
+    author TEXT NOT NULL,
+    price NUMERIC NOT NULL,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    create_by TEXT NOT NULL,
+    update_by TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1,
+
+    -- 定义主键
+    PRIMARY KEY (id)
+);
+
+-- 添加表注释
+COMMENT ON TABLE app IS 'App应用信息';
+
+-- 可选：为每个字段添加注释，便于理解与维护
+COMMENT ON COLUMN app.id IS '主键ID';
+COMMENT ON COLUMN app.name IS '应用名称';
+COMMENT ON COLUMN app.author IS '应用作者';
+COMMENT ON COLUMN app.price IS '应用价格（支持精确小数，如 NUMERIC(10,2) 如果需要可指定精度）';
+COMMENT ON COLUMN app.create_time IS '创建时间，带时区，默认当前时间';
+COMMENT ON COLUMN app.update_time IS '更新时间，带时区，默认当前时间';
+COMMENT ON COLUMN app.create_by IS '创建人';
+COMMENT ON COLUMN app.update_by IS '更新人';
+COMMENT ON COLUMN app.version IS '版本号，默认为1';
 ```
