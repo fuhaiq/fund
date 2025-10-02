@@ -2,12 +2,16 @@ package org.fhq.fund.app;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.ITable;
+import org.fhq.common.dbunit.DBUnitUtil;
 import org.fhq.fund.AsbtractDBTestCase;
+import org.fhq.fund.FundApplication;
 import org.fhq.fund.service.IAppService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest(classes = FundApplication.class)
 public class AppDBTestCase extends AsbtractDBTestCase {
     @Autowired
     private IAppService appService;
@@ -32,5 +36,13 @@ public class AppDBTestCase extends AsbtractDBTestCase {
         ITable actual = getActualTable("app");
         ITable expect = getExpectTable("app");
         assertTables(actual, expect);
+    }
+
+    @Test
+    public void testQueryTable() {
+        ITable price_gt_700 = getActualTable("app_price_gt_700",
+                "select * from app where price > 700 order by price desc"
+        );
+        DBUnitUtil.printPretty(price_gt_700);
     }
 }

@@ -1,9 +1,14 @@
 package org.fhq.fund;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dbunit.*;
+import org.apache.logging.log4j.util.Strings;
+import org.dbunit.Assertion;
+import org.dbunit.DBTestCase;
+import org.dbunit.DataSourceDatabaseTester;
+import org.dbunit.IDatabaseTester;
 import org.dbunit.database.DatabaseConfig;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.SortedTable;
@@ -13,16 +18,16 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@SpringBootTest(classes = FundApplication.class)
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 @Slf4j
 public abstract class AsbtractDBTestCase extends DBTestCase {
 
@@ -37,17 +42,13 @@ public abstract class AsbtractDBTestCase extends DBTestCase {
     @Autowired
     private DataSource dataSource;
 
+    @SneakyThrows
     public AsbtractDBTestCase(String name, String dir) {
         super(name);
         this.dir = dir;
-
-        try {
-            IDataSet dataset = loadDataSet("expect.xls");
-            for (String tableName : dataset.getTableNames()) {
-                expectTables.put(tableName, dataset.getTable(tableName));
-            }
-        } catch (IOException | DataSetException ex) {
-            throw new RuntimeException("DBUnit init expect tables error", ex);
+        IDataSet dataset = loadDataSet("expect.xls");
+        for (String tableName : dataset.getTableNames()) {
+            expectTables.put(tableName, dataset.getTable(tableName));
         }
     }
 
@@ -83,25 +84,32 @@ public abstract class AsbtractDBTestCase extends DBTestCase {
         super.tearDown();
     }
 
-    private IDataSet loadDataSet(String fileName) throws IOException, DataSetException {
+    @SneakyThrows
+    private IDataSet loadDataSet(String fileName) {
         String filePath = dir + "/" + fileName;
         File dataFile = new ClassPathResource(filePath).getFile();
         return new XlsDataSet(dataFile);
     }
 
+    @SneakyThrows
     protected ITable getActualTable(String name) {
-        try {
-            return getDatabaseTester().getConnection().createDataSet().getTable(name);
-        } catch (Exception ex) {
-            throw new RuntimeException("DBUnit getActualTable error", ex);
-        }
+        checkNotNull(name, "Table name is null or empty");
+        return getDatabaseTester().getConnection().createDataSet().getTable(name);
+    }
+
+    @SneakyThrows
+    protected ITable getActualTable(String name, @NotNull String sql) {
+        checkNotNull(name, "Table name is null or empty");
+        checkState(Strings.isNotBlank(sql), "Sql is null or empty");
+        return getDatabaseTester().getConnection().createQueryTable(name, sql);
     }
 
     protected ITable getExpectTable(String name) {
         return expectTables.get(name);
     }
 
-    protected void assertTables(ITable actual, ITable expect) throws DatabaseUnitException {
+    @SneakyThrows
+    protected void assertTables(ITable actual, ITable expect) {
         final ITable expectedFiltered = DefaultColumnFilter
                 .excludedColumnsTable(expect, defaultIgnoreCols);
         final ITable actualFiltered = DefaultColumnFilter
