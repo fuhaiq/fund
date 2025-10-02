@@ -1,19 +1,20 @@
 package org.fhq.fund.app;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.ITable;
-import org.fhq.fund.AbstractDbUnitTest;
+import org.fhq.fund.AsbtractDBTestCase;
 import org.fhq.fund.service.IAppService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Slf4j
-public class AppServiceTestCase extends AbstractDbUnitTest {
-
+public class AppDBTestCase extends AsbtractDBTestCase {
     @Autowired
     private IAppService appService;
+
+    public AppDBTestCase() {
+        super("App table DB unit test", "dataset/20250929");
+    }
 
     @Test
     public void testAdjustPricesBelowBy30Percent() throws DatabaseUnitException {
@@ -31,10 +32,5 @@ public class AppServiceTestCase extends AbstractDbUnitTest {
         ITable actual = getActualTable("app");
         ITable expect = getExpectTable("app");
         assertTables(actual, expect);
-    }
-
-    @Override
-    protected String baseDir() {
-        return "dataset/20250929";
     }
 }

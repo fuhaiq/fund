@@ -13,6 +13,7 @@ import org.fhq.common.core.validation.UpdateGroup;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
@@ -43,7 +44,7 @@ public class App extends Model<App> {
     private String author;
 
     @TableField("price")
-    private Integer price;
+    private BigDecimal price;
 
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     @Null(message = "不能指定创建时间", groups = {AddGroup.class, UpdateGroup.class})
